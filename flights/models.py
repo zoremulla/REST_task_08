@@ -16,7 +16,7 @@ class Booking(models.Model):
 	flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="bookings")
 	date = models.DateField()
 	user = models.ForeignKey(User, on_delete=models.CASCADE,  related_name="bookings")
-	number_of_travellers = models.PositiveIntegerField()
+	passengers = models.PositiveIntegerField()
 
 	def __str__(self):
 		return "%s: %s" % (self.user.username, str(self.flight))
