@@ -25,4 +25,5 @@ urlpatterns = [
     path('booking/<int:booking_id>/', views.BookingDetails.as_view(), name="booking-details"),
     path('booking/<int:booking_id>/update/', views.UpdateBooking.as_view(), name="update-booking"),
     path('booking/<int:booking_id>/cancel/', views.CancelBooking.as_view(), name="cancel-booking"),
+    path('book/<int:flight_id>/', views.BookFlight.as_view(), name="book-flight"),
 ]
