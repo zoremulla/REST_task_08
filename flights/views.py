@@ -47,3 +47,6 @@ class BookFlight(CreateAPIView):
 	def perform_create(self, serializer):
 		serializer.save(user=self.request.user, flight_id=self.kwargs['flight_id'])
 
+
+class Register(CreateAPIView):
+	serializer_class = RegisterSerializer
