@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, DestroyAPIView, CreateAPIView
 from datetime import datetime
 
 from .models import Flight, Booking
@@ -29,6 +29,12 @@ class UpdateBooking(RetrieveUpdateAPIView):
 	serializer_class = UpdateBookingSerializer
 	lookup_field = 'id'
 	lookup_url_kwarg = 'booking_id'
+
+	def get_serializer_class(self):
+		if self.request.method == 'GET':
+			print('get')
+			return BookingDetailsSerializer
+		return UpdateBookingSerializer
 
 
 class CancelBooking(DestroyAPIView):
