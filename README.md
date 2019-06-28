@@ -20,7 +20,7 @@
    * `id`.
    * `passengers`.
 6. Modify the `BookingSerializer` so that it returns the following:
-   *`flight`: Show the destination instead of the flight id using [SlugRelatedField](https://www.django-rest-framework.org/api-guide/relations/#slugrelatedfield).
+   * `flight`: Show the destination instead of the flight id using [SlugRelatedField](https://www.django-rest-framework.org/api-guide/relations/#slugrelatedfield).
    * `date`
    * `id`  
 7. Push your code
