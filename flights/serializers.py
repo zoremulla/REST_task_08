@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Flight, Booking
+from .models import Flight, Booking, Profile
 
 
 class FlightSerializer(serializers.ModelSerializer):
@@ -49,3 +49,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         new_user.set_password(password)
         new_user.save()
         return validated_data
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Profile
+		fields = ['user', 'miles']
+
