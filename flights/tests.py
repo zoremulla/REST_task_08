@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from datetime import date, timedelta
 
-from .models import Flight, Booking
+from .models import Flight, Booking, Profile
 
 
 class FlightListTest(APITestCase):
@@ -72,7 +72,7 @@ class BookingListTest(APITestCase):
 		self.assertEqual(len(response.data), bookings.count())
 
 		for index, booking in enumerate(bookings):
-			self.assertEqual(dict(response.data[index]), {"id" : booking.id, "flight" : booking.flight.id, "date": str(booking.date)})
+			self.assertEqual(dict(response.data[index]), {"id" : booking.id, "flight" : booking.flight.destination, "date": str(booking.date)})
 
 
 
@@ -129,11 +129,11 @@ class BookingDetails(APITestCase):
 
 		response = self.client.get(reverse('booking-details', args=[1]))
 		booking = Booking.objects.get(id=1)
-		self.assertEqual(dict(response.data), {"id" : booking.id, "flight" : booking.flight.id, "date": str(booking.date), "passengers":booking.passengers})
+		self.assertEqual(dict(response.data), {"id" : booking.id, "flight" : {'destination': booking.flight.destination, 'time': str(booking.flight.time), 'price': str(booking.flight.price), 'id': booking.flight.id}, "total": booking.flight.price*booking.passengers, "date": str(booking.date), "passengers":booking.passengers})
 
 		response = self.client.get(reverse('booking-details', args=[2]))
 		booking = Booking.objects.get(id=2)
-		self.assertEqual(dict(response.data), {"id" : booking.id, "flight" : booking.flight.id, "date": str(booking.date), "passengers":booking.passengers})
+		self.assertEqual(dict(response.data), {"id" : booking.id, "flight" : {'destination': booking.flight.destination, 'time': str(booking.flight.time), 'price': str(booking.flight.price), 'id': booking.flight.id}, "total": booking.flight.price*booking.passengers, "date": str(booking.date), "passengers":booking.passengers})
 
 
 
@@ -385,8 +385,65 @@ class Register(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+class ProfileDetails(APITestCase):
+	def setUp(self):
+		flight1 = {'destination': 'Wakanda', 'time': '10:00', 'price': 230, 'miles': 4000}
+		flight2 = {'destination': 'La la land', 'time': '00:00', 'price': 1010, 'miles': 1010}
+
+		flight1 = Flight.objects.create(**flight1)
+		flight2 = Flight.objects.create(**flight2)
+
+		self.user_data = {"username" : "laila", "password" : "1234567890-="}
+
+		self.user = User(username=self.user_data["username"])
+		self.user.set_password(self.user_data["password"])
+		self.user.save()
+
+		Profile.objects.create(user=self.user)
+
+		user2 = User(username="laila2")
+		user2.set_password("1234567890-=")
+		user2.save()
+
+		Booking.objects.create(flight=flight1, date=date.today(), user=self.user, passengers=2)
+		Booking.objects.create(flight=flight2, date=date.today()+timedelta(days=2), user=self.user, passengers=2)
+		Booking.objects.create(flight=flight1, date=date.today()+timedelta(days=4), user=user2, passengers=2)
+		Booking.objects.create(flight=flight2, date="2021-01-01", user=self.user, passengers=2)
+
+	def test_url_works(self):
+		response = self.client.post(reverse('login'), self.user_data)
+		self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+		response = self.client.get(reverse("profile-details"))
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+	def test_url_unauthorized(self):
+		response = self.client.get(reverse("profile-details"))
+		self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+	def test_serializer(self):
+		response = self.client.post(reverse('login'), self.user_data)
+		self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['access'])
+		response = self.client.get(reverse("profile-details"))
+
+		self.assertEqual(response.data['user'], {"first_name": self.user.first_name, "last_name": self.user.last_name})
+		past_bookings = Booking.objects.filter(user=self.user, date__lt=date.today())
+		past_bookings_list = []
+		for booking in past_bookings:
+			past_bookings_list.append({'flight':booking.flight.destination, 'date':str(booking.date), 'id':booking.id})
+		self.assertEqual(response.data['past_bookings'], past_bookings_list)
+		self.assertEqual(response.data['miles'], self.user.profile.miles)
+		miles = self.user.profile.miles
+		if miles < 10000:
+			tier =  "Blue"
+		elif miles < 60000:
+			tier =  "Silver"
+		elif miles < 100000:
+			tier =  "Gold"
+		else:
+			tier =  "Platinum"
+
+		self.assertEqual(response.data['tier'], tier) 
 
 
 
