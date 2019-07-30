@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from datetime import datetime
 
 from .models import Flight, Booking
-from .serializers import FlightSerializer, BookingSerializer, BookingDetailsSerializer, UpdateBookingSerializer, RegisterSerializer, AdminUpdateBookingSerializer, ProfileSerializer
+from .serializers import FlightSerializer, BookingSerializer, BookingDetailsSerializer, UpdateBookingSerializer, RegisterSerializer, AdminUpdateBookingSerializer, ProfileSerializer, UserSerializer
 from .permissions import IsBookingOwner, IsChangable
 
 
@@ -66,6 +66,7 @@ class Register(CreateAPIView):
 
 class ProfileDetails(RetrieveAPIView):
 	serializer_class = ProfileSerializer
+	
 
 	def get_object(self):
 		return self.request.user.profile
