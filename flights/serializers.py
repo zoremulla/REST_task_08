@@ -14,7 +14,7 @@ class BookingSerializer(serializers.ModelSerializer):
 	flight=serializers.SlugRelatedField(slug_field='destination', read_only=True)
 	class Meta:
 		model = Booking
-		fields = ['flight', 'date', 'id', 'past_bookings']
+		fields = ['flight', 'date', 'id',]
 
 
 
